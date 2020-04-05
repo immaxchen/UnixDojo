@@ -2,7 +2,7 @@ aaaa
 { bbbb }
 0000, cccc { { 1111
 }
-some { dddd }
+some { dddd } // comment
 more { eeee
 { ffff { gggg, hhhh } }
 }

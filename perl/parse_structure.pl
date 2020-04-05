@@ -20,6 +20,7 @@ sub parse_structure {
     while ( my ($extracted, $remainder, $prefix) = extract_bracketed($text, "{}", "[^{}]*") ) {
         if ( ! $extracted ) { last; }
 
+        trim $prefix; $prefix =~ s/.*[\r|\n]//g;
         trim $prefix;
         trim $extracted; $extracted =~ s/^{|}$//g;
         trim $extracted;
