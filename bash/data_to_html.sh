@@ -28,12 +28,20 @@ done
 
 if [ "$inputFile" = "-" ] && [ -t 0 ]; then
     >&2 echo "$0: need input from a file or a pipe"; exit 1
-else
-    content=$(cat "$inputFile")
 fi
 
+hcount=0
+rcount=0
 echo "<table$attribute>"
-head -n  $(($headLines))   <(echo "$content") | sed "s/$delimiter/<\/th><th>/g" | sed 's/^/<tr><th>/' | sed 's/$/<\/th><\/tr>/'
-tail -n +$(($headLines+1)) <(echo "$content") | sed "s/$delimiter/<\/td><td>/g" | sed 's/^/<tr><td>/' | sed 's/$/<\/td><\/tr>/'
+while read INPUT; do
+    if [ $hcount -lt $headLines ]; then
+        echo "<tr><th>$INPUT</th></tr>" | sed "s/$delimiter/<\/th><th>/g"
+        ((hcount++))
+    else
+        [[ $((rcount%2)) -eq 0 ]] && attr='' || attr=' class="striped"'
+        echo "<tr$attr><td>$INPUT</td></tr>" | sed "s/$delimiter/<\/td><td>/g"
+        ((rcount++))
+    fi
+done < "$inputFile"
 echo "</table>"
 
