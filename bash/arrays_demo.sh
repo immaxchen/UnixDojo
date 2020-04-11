@@ -74,4 +74,21 @@ myarr=( "${myarr[@]:0:4}" "${myarr[@]:5}" )
 
 echo ${myarr[@]}
 
+echo ===== join =====
+
+echo $(perl -e 'print join(shift, @ARGV)' -- "|" ${myarr[@]})
+
+echo $(printf "%s|" ${myarr[@]} | sed 's/|$//')
+
+echo ===== associative array =====
+
+declare -A asoarr=( ['hello']='world' ['merry']='christmas' )
+
+echo ${asoarr['hello']}
+echo ${asoarr['merry']}
+
+unset asoarr['merry']
+
+echo ${!asoarr[@]}
+
 
