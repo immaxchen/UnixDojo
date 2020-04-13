@@ -37,6 +37,24 @@ echo < <(date) # echo dont take stdin
 { date; date; date; } > >(cat -n)
 
 echo "
+===== Here-String and Here-Doc =====
+
+<<<  here-string: use a string as stdin
+<<   here-doc: use a block of text as stdin
+"
+
+cat <<< "This is a sting."
+echo <<< "This is a string."
+
+cat << EOF
+mysterious content
+EOF
+
+echo << EOF
+mysterious content
+EOF
+
+echo "
 ===== Command Substitution =====
 
 \$( cmd ) or \` cmd \`  cmd output as a string
