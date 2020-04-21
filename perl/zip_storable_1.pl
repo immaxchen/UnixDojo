@@ -1,9 +1,9 @@
-# perl zip_storable.pl | gzip > hash.storable.gz
+# perl zip_storable_1.pl | gzip > hash.storable.gz
 
 use strict;
 use warnings;
 
-use Storable ("nstore_fd", "retrieve");
+use Storable ("nstore_fd");
 
 my $hash = {a => 1, b => 2, c => [3, 4, 5]};
 
