@@ -1,3 +1,5 @@
+#!/bin/env perl
+
 use strict;
 use warnings;
 
@@ -5,9 +7,9 @@ use Data::Dumper;
 
 use FindBin;
 
-use lib "$FindBin::Bin/util";
+use lib "$FindBin::Bin";
 
-use zstorable;
+use util::zstorable;
 
 sub main {
 

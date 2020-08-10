@@ -1,4 +1,6 @@
-package zstorable;
+#!/bin/env perl
+
+package util::zstorable;
 
 use strict;
 use warnings;
