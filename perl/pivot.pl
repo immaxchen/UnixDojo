@@ -1,12 +1,12 @@
 #!/bin/env perl
 
-# printf "aa bb cc dd\n11 33 55 77\n22 44 66 88\n" | perl stack.pl 1:2 3: tt vv
+# printf "aa bb cc dd\n11 33 55 77\n22 44 66 88\n" | perl pivot.pl 1:2 3 4
 
 use strict;
 use warnings;
 
 my $delimiter = " ";
-my $separator = " ";
+my $separator = "-";
 my $nullvalue = "NA";
 
 sub maxcol {
@@ -61,23 +61,34 @@ sub main {
 
     my $idxs = expand $ARGV[0], $cmax;
     my $cols = expand $ARGV[1], $cmax;
+    my $vals = expand $ARGV[2], $cmax;
 
-    my @head = split $delimiter, $line[0];
-
-    print concat \@head, $idxs;
-    print $delimiter.$ARGV[2].$delimiter.$ARGV[3];
-    print "\n";
+    my $name = {};
+    my $dict = {};
 
     for (my $i = 1; $i <= $#line; $i++) {
 
         my @cell = split $delimiter, $line[$i];
 
-        for my $c (sort keys %$cols) {
+        my $idx = concat \@cell, $idxs;
+        my $col = concat \@cell, $cols;
+        my $val = concat \@cell, $vals;
 
-            print concat \@cell, $idxs;
-            print $delimiter.($head[$c-1] // $nullvalue).$delimiter.($cell[$c-1] // $nullvalue);
-            print "\n";
-        }
+        $name->{$col} = 1;
+        $dict->{$idx}->{$col} = $val;
+    }
+
+    my @head = split $delimiter, $line[0];
+
+    print concat \@head, $idxs;
+    print $delimiter.$_ for sort keys %$name;
+    print "\n";
+
+    for my $idx (sort keys %$dict) {
+
+        print $idx;
+        print $delimiter.($dict->{$idx}->{$_} // $nullvalue) for sort keys %$name;
+        print "\n";
     }
 }
 
