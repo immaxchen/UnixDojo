@@ -5,9 +5,13 @@ use warnings;
 
 use List::Util ("min","max","sum");
 
+# TODO: set by input args
 my $delimiter = " ";
 my $separator = "-";
 my $nullvalue = "NA";
+
+# TODO: NA strategies - ignore, fill, return NA
+my $fillvalue = 0;
 
 sub maxcol {
 
@@ -24,6 +28,7 @@ sub maxcol {
     return $cmax;
 }
 
+# TODO: select by column name
 sub expand {
 
     my %keys = map { $_ => 1 } split ",", shift;
@@ -53,8 +58,9 @@ sub concat {
     return join $separator, map { $data->[$_-1] // $nullvalue } sort keys %$keys;
 }
 
-sub avg { return @_ > 0 ? sum(@_)/@_ : undef; }
-sub std { my $m = avg(@_); return $#_ < 0 ? undef : $#_ < 1 ? 0 : ( sum(map { ($_-$m) ** 2 } @_)/$#_ ) ** 0.5; }
+sub mean { return @_ > 0 ? sum(@_)/@_ : undef; }
+sub std { my $m = mean(@_); return $#_ < 0 ? undef : $#_ < 1 ? 0 : ( sum(map { ($_-$m) ** 2 } @_)/$#_ ) ** 0.5; }
+# TODO: pctl (percentile) - p50, p5, p95, etc
 
 sub print_aggregate {
 
@@ -64,19 +70,19 @@ sub print_aggregate {
     for my $opt (@$opts) {
 
         if    ($opt eq "count") { print $delimiter.@$data; }
-        elsif ($opt eq "first") { print $delimiter.($data->[0]  // $nullvalue); }
-        elsif ($opt eq "last" ) { print $delimiter.($data->[-1] // $nullvalue); }
-        elsif ($opt eq "min"  ) { print $delimiter.(min(@$data) // $nullvalue); }
-        elsif ($opt eq "max"  ) { print $delimiter.(max(@$data) // $nullvalue); }
-        elsif ($opt eq "sum"  ) { print $delimiter.(sum(@$data) // $nullvalue); }
-        elsif ($opt eq "avg"  ) { print $delimiter.(avg(@$data) // $nullvalue); }
-        elsif ($opt eq "std"  ) { print $delimiter.(std(@$data) // $nullvalue); }
+        elsif ($opt eq "first") { print $delimiter.($data->[0]   // $nullvalue); }
+        elsif ($opt eq "last" ) { print $delimiter.($data->[-1]  // $nullvalue); }
+        elsif ($opt eq "min"  ) { print $delimiter.(min(@$data)  // $nullvalue); }
+        elsif ($opt eq "max"  ) { print $delimiter.(max(@$data)  // $nullvalue); }
+        elsif ($opt eq "sum"  ) { print $delimiter.(sum(@$data)  // $nullvalue); }
+        elsif ($opt eq "mean" ) { print $delimiter.(mean(@$data) // $nullvalue); }
+        elsif ($opt eq "std"  ) { print $delimiter.(std(@$data)  // $nullvalue); }
     }
 }
 
 sub main {
 
-    ($#ARGV > 1) or die('USAGE: printf "zone job sex age\nwest dev M 28\neast dev F 20\neast dev F 30\n" | perl pivot.pl 1:2 3 4 --avg'."\n");
+    ($#ARGV > 1) or die('USAGE: printf "zone job sex age\nwest dev M 28\neast dev F 20\neast dev F 30\n" | perl pivot.pl 1:2 3 4 --mean'."\n");
 
     chomp( my @line = <STDIN> );
 
@@ -96,34 +102,33 @@ sub main {
         my @cell = split $delimiter, $line[$i];
 
         my $idx = concat \@cell, $idxs;
-        my $col = concat \@cell, $cols;
-        my $val = concat \@cell, $vals;
+        my $col = concat \@cell, $cols; $name->{$col} = 1;
 
-        $name->{$col} = 1;
+        for my $val (sort keys %$vals) {
 
-        exists $dict->{$idx}->{$col} or $dict->{$idx}->{$col} = [];
+            exists $dict->{$idx}->{$col}->{$val} or $dict->{$idx}->{$col}->{$val} = [];
 
-        push @{$dict->{$idx}->{$col}}, $val;
+            push @{$dict->{$idx}->{$col}->{$val}}, $cell[$val-1];
+        }
     }
 
     my @head = split $delimiter, $line[0];
 
-    my $v = concat \@head, $vals;
-
     print concat \@head, $idxs;
-    print $delimiter.$_ for map { my $t = $_; map { "$_($t.$v)" } @opts } sort keys %$name;
+    print $delimiter.$_ for map { my $c = $_; map { my $v = $head[$_-1]; map { "$_($c.$v)" } @opts } sort keys %$vals } sort keys %$name;
     print "\n";
 
     for my $idx (sort keys %$dict) {
 
         print $idx;
         for my $col (sort keys %$name) {
+        for my $val (sort keys %$vals) {
 
-            my $cell = $dict->{$idx}->{$col} // [];
+            my $cell = $dict->{$idx}->{$col}->{$val} // [];
             my @data = grep ! /^$nullvalue$/, @$cell;
 
             print_aggregate \@opts, \@data;
-        }
+        }}
         print "\n";
     }
 }
