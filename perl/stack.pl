@@ -1,7 +1,5 @@
 #!/bin/env perl
 
-# printf "aa bb cc dd\n11 33 55 77\n22 44 66 88\n" | perl stack.pl 1:2 3: tt vv
-
 use strict;
 use warnings;
 
@@ -54,6 +52,8 @@ sub concat {
 }
 
 sub main {
+
+    ($#ARGV > 2) or die('USAGE: printf "aa bb cc dd\n11 33 55 77\n22 44 66 88\n" | perl stack.pl 1:2 3: tt vv'."\n");
 
     chomp( my @line = <STDIN> );
 
